@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connor Stine</title>
+<meta name="description" content="Connor Stine: portfolio, projects and personal tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  /* MASTER SWITCH: false = no welcome menu, no swarm, site shows instantly for everyone. */
+  window.SWARM_ENABLED = true;
+  try {
+    var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (window.SWARM_ENABLED && !calm) document.documentElement.classList.add("sw-pending");
+  } catch (e) {}
+</script>
+<style>
+/*
+VOICE: confident, playful builder's portfolio
+IDEA: a live multiplayer design file being assembled in front of you
+PICTURE: a swarm of named cursors that draws boxes, types text and fills the page
+COLOUR and TYPE: warm charcoal, paper ink, one vermilion accent; Space Grotesk + Inter
+LAYOUT: welcome menu, top bar with tabs, big intro, grouped card grids per tab
+*/
+:root{color-scheme:light dark;
+  --bg:light-dark(#f4f1ea,#121110);--panel:light-dark(#ffffff,#1c1a18);--line:light-dark(#dcd6ca,#2c2925);
+  --ink:light-dark(#1b1917,#f2efe8);--muted:light-dark(#6d665c,#a39c90);--accent:#ff5a36;--on-accent:#1b1917}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.logo,.menu-name{font-family:"Space Grotesk",system-ui,sans-serif}
+a{color:inherit}
+header{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;
+  padding:12px max(5vw,16px);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.logo{font-weight:700;font-size:19px;text-decoration:none}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font:500 15px Inter,sans-serif;text-decoration:none}
+nav a[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{max-width:1100px;margin:0 auto;padding:clamp(32px,6vw,80px) max(5vw,16px) 140px}
+.panel[hidden]{display:none}
+.kicker{display:inline-block;font-size:14px;font-weight:600;color:var(--accent);margin-bottom:6px}
+h1{font-size:clamp(40px,8vw,72px);line-height:1.04;margin:0 0 18px;text-wrap:balance}
+.lede{font-size:18px;color:var(--muted);max-width:60ch;margin:0}
+h2{font-size:24px;margin:56px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:16px;margin-top:18px}
+.card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;text-decoration:none;transition:transform .2s,border-color .2s}
+a.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.card h3{margin:0 0 6px;font-size:19px;line-height:1.25}
+.card p{margin:0;color:var(--muted);font-size:15px;flex:1}
+.card .meta{margin-top:14px;font-size:13px;font-weight:600;color:var(--accent)}
+a.card .meta::after{content:" ↗"}
+
+/* ---------- welcome menu ---------- */
+.menu{position:fixed;inset:0;z-index:8800;display:grid;place-items:center;padding:24px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);transition:opacity .45s}
+.menu[hidden]{display:none}
+.menu.out{opacity:0;pointer-events:none}
+.menu-card{width:min(520px,100%);background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:clamp(28px,6vw,44px);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.menu-hi{font-size:15px;color:var(--muted);margin:0}
+.menu-name{font-size:clamp(38px,9vw,56px);font-weight:700;line-height:1.05;margin:6px 0 10px}
+.menu-name span{color:var(--accent)}
+.menu-sub{color:var(--muted);margin:0 auto 26px;max-width:38ch}
+.menu-actions{display:grid;gap:10px}
+.btn{min-height:52px;border-radius:14px;font:600 16px Inter,sans-serif;cursor:pointer;border:1px solid var(--line);background:none;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn small{display:block;font-weight:500;font-size:13px;opacity:.75}
+.remember{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:14px;color:var(--muted);cursor:pointer;min-height:44px}
+.remember input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* ---------- swarm ---------- */
+.sw-pending [data-build]{opacity:0}
+.sw-hidden{opacity:0!important}
+.sw-layer{position:fixed;inset:0;pointer-events:none;z-index:9000;overflow:hidden;transition:opacity .6s}
+.sw-cursor{position:absolute;left:0;top:0;will-change:transform}
+.sw-cursor svg{display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.sw-name{position:absolute;left:15px;top:19px;font:600 11px/1 Inter,sans-serif;padding:3px 6px;border-radius:5px;color:#151311;white-space:nowrap}
+.sw-box{position:absolute;border:1.5px solid;border-radius:8px;transition:opacity .45s}
+.sw-box::after{content:"";position:absolute;right:-4px;bottom:-4px;width:7px;height:7px;background:#fff;border:1.5px solid currentColor}
+.sw-controls{position:fixed;right:16px;bottom:16px;z-index:9500;display:flex;gap:8px}
+.pill{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:500 14px Inter,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.pill[hidden]{display:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#portfolio">connor<span>.</span>stine</a>
+  <nav role="tablist" aria-label="Sections">
+    <a role="tab" href="#portfolio" id="tab-portfolio" aria-selected="true">Portfolio</a>
+    <a role="tab" href="#projects" id="tab-projects" aria-selected="false">Projects</a>
+    <a role="tab" href="#tools" id="tab-tools" aria-selected="false">Tools</a>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<div class="menu" id="menu" hidden role="dialog" aria-modal="true" aria-labelledby="menuName">
+  <div class="menu-card">
+    <p class="menu-hi">Welcome to</p>
+    <div class="menu-name" id="menuName">Connor Stine<span>.</span></div>
+    <p class="menu-sub">Projects, apps and little tools I've built. Want to watch the site build itself?</p>
+    <div class="menu-actions">
+      <button class="btn primary" id="watchBtn">Watch it build<small>About 10 seconds</small></button>
+      <button class="btn" id="skipMenuBtn">Skip to the site</button>
+    </div>
+    <label class="remember"><input type="checkbox" id="remember"> Remember my choice</label>
+  </div>
+</div>
+
+<div class="sw-controls">
+  <button class="pill" id="swSkip" hidden>Skip</button>
+  <button class="pill" id="swReplay">Replay build</button>
+</div>
+
+<script>
+{
+/* =========================================================
+   YOUR CONTENT. Add, remove or move anything here.
+   tab:   "portfolio" | "projects" | "tools"
+   group: section heading inside that tab (new name = new section)
+   link:  optional; leave "" for no link
+   ========================================================= */
+const TABS = {
+  portfolio: { kicker: "Portfolio", title: "Hey, I'm Connor. I build things with AI.",
+    lede: "Sociology student at Western Washington University, heading toward nursing. I run an AI content brand, make browser tools, and ship small apps for fun." },
+  projects:  { kicker: "Projects", title: "Things I've built.",
+    lede: "Apps, sites and browser extensions. Tap a card to open it." },
+  tools:     { kicker: "Tools", title: "My multitool.",
+    lede: "Quality-of-life tools, school helpers and interactive explainers I've made." }
+};
+
+const ITEMS = [
+  { tab:"portfolio", group:"About", title:"About me", desc:"Who I am, what I study, and why I like turning ideas into working tools.", tag:"Bio", link:"" },
+  { tab:"portfolio", group:"About", title:"ASMRSpreads", desc:"An AI-generated ASMR content brand, from prompt engineering to posting.", tag:"Brand", link:"" },
+  { tab:"portfolio", group:"About", title:"Skills", desc:"Prompt design, AI video, Chrome extensions, small web apps, social growth.", tag:"Toolkit", link:"" },
+  { tab:"portfolio", group:"About", title:"Find me", desc:"My code and projects live on GitHub.", tag:"GitHub", link:"https://github.com/connorbstine" },
+
+  { tab:"projects", group:"Apps & sites", title:"Claude Wrapped 2026", desc:"A year-in-review of my Claude usage, with a builder so anyone can make their own from their data export.", tag:"Web app", link:"https://claude.ai/artifact/62g6UCvYadtuKAhQWCbC8y" },
+  { tab:"projects", group:"Apps & sites", title:"Coin pusher game", desc:"A mobile coin-pusher idle game with upgrades and a satisfying push.", tag:"Game · in progress", link:"" },
+  { tab:"projects", group:"Apps & sites", title:"This website", desc:"Hand-built portfolio with a custom swarm-cursor intro.", tag:"Site", link:"https://github.com/connorbstine/portfolio" },
+  { tab:"projects", group:"Browser extensions", title:"Hypeddit Auto-Gate", desc:"A Chrome extension that clears Hypeddit free-download gates for SoundCloud tracks.", tag:"Chrome extension", link:"" },
+
+  { tab:"tools", group:"Everyday tools", title:"Snap-Ready Video Fixer", desc:"Gets videos ready to post without the upload headaches.", tag:"Video", link:"https://claude.ai/artifact/UhYSUGUGkypUnbzGcb76Na" },
+  { tab:"tools", group:"Everyday tools", title:"Instagram Follow Tracker", desc:"Import your Instagram export and see who unfollowed, who followed, and who doesn't follow back.", tag:"Social", link:"https://claude.ai/artifact/BJ2utWJLdPbzJgxhjsccFH" },
+  { tab:"tools", group:"Everyday tools", title:"IV Calculator", desc:"A quick calculator I built for myself.", tag:"Calculator", link:"https://claude.ai/artifact/L2wCLMAUY5cLxLaGrXax5z" },
+  { tab:"tools", group:"Everyday tools", title:"Résumé Screen Check", desc:"Scores a résumé against a job posting, shows missing keywords, and suggests honest rewrites.", tag:"Uses AI", link:"https://claude.ai/artifact/TWUMN1GSSDLyRaJF4C3xa7" },
+  { tab:"tools", group:"Interactive explainers", title:"The Human Heart · 3D", desc:"An interactive 3D heart you can spin and explore.", tag:"Anatomy", link:"https://claude.ai/artifact/PoJXSLvBK5u5nVQB5CP2VB" },
+  { tab:"tools", group:"Interactive explainers", title:"Neuron · Action Potential", desc:"Simulate how a neuron fires, step by step.", tag:"Biology", link:"https://claude.ai/artifact/KED9hELNzGfqKfXkS5EH6C" },
+  { tab:"tools", group:"Interactive explainers", title:"How a Polaroid Works", desc:"A take-apart teardown of an instant camera.", tag:"Teardown", link:"https://claude.ai/artifact/Nzg3gMi6ob79fHCLAvSLjj" },
+  { tab:"tools", group:"Interactive explainers", title:"Spinning Gear", desc:"An exploded-view test of a spinning gear.", tag:"3D test", link:"https://claude.ai/artifact/BUPA7UtdgRuR3FKKw914tu" },
+  { tab:"tools", group:"School", title:"Learning Note Sheet", desc:"PSYC 101 notes on classical and operant conditioning, in lecture order.", tag:"Notes", link:"https://claude.ai/artifact/1gUq24UY7aFWzH1Zr71KLg" },
+  { tab:"tools", group:"School", title:"Patient Zero Vision", desc:"A speculative write-up: a world where you can see your own infections.", tag:"Writing", link:"https://claude.ai/artifact/NRYSZmZKDY2qjtb3v1UXwx" }
+];
+
+/* ---------- render ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const card = it => {
+  const inner = '<h3>' + esc(it.title) + '</h3><p>' + esc(it.desc) + '</p><span class="meta">' + esc(it.tag) + '</span>';
+  return it.link
+    ? '<a class="card" data-build="box" href="' + esc(it.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+    : '<article class="card" data-build="box">' + inner + '</article>';
+};
+document.getElementById("main").innerHTML = Object.keys(TABS).map(key => {
+  const t = TABS[key], items = ITEMS.filter(i => i.tab === key);
+  const groups = [...new Set(items.map(i => i.group))];
+  const showHeads = groups.length > 1;
+  return '<section class="panel" id="' + key + '" role="tabpanel" aria-labelledby="tab-' + key + '" hidden>' +
+    '<span class="kicker" data-build="type">' + esc(t.kicker) + '</span>' +
+    '<h1 data-build="type">' + esc(t.title) + '</h1>' +
+    '<p class="lede" data-build="type">' + esc(t.lede) + '</p>' +
+    groups.map(g => (showHeads ? '<h2 data-build="type">' + esc(g) + '</h2>' : '') +
+      '<div class="grid">' + items.filter(i => i.group === g).map(card).join("") + '</div>').join("") +
+    '</section>';
+}).join("");
+
+/* ---------- swarm engine ---------- */
+const CONFIG = {
+  cursors: 10, maxSpeed: 15,
+  names: ["nova","pixel","echo","juno","rook","vega","kit","moss","sol","wren","onyx","lumi"],
+  colors: ["#ff5a36","#ffb347","#ff7eb6","#5ec8ff","#b99bff","#ffe14d","#4fe3c1","#9be564"]
+};
+const KEY = "swarmIntroChoice";
+const root = document.documentElement;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const menu = document.getElementById("menu");
+const skipBtn = document.getElementById("swSkip");
+const replayBtn = document.getElementById("swReplay");
+const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+const rand = (a,b) => a + Math.random()*(b-a);
+let run = null, mode = "skip";
+
+function getChoice(){ try { return localStorage.getItem(KEY); } catch (e) { return null; } }
+function setChoice(v){ try { localStorage.setItem(KEY, v); } catch (e) {} }
+function canAnimate(){ return window.SWARM_ENABLED && !reduceMotion; }
+function activePanel(){ return document.querySelector(".panel:not([hidden])"); }
+
+function arrowSVG(color){
+  return '<svg width="18" height="22" viewBox="0 0 18 22"><path d="M2 2 L2 18 L6.4 13.8 L9.6 20.6 L12.4 19.3 L9.3 12.6 L15.2 12.6 Z" fill="' + color + '" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+}
+function inView(el){ const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && r.width > 0; }
+function revealNow(el){
+  el.classList.remove("sw-hidden");
+  if (el.dataset.full !== undefined){ el.textContent = el.dataset.full; delete el.dataset.full; }
+  el.style.clipPath = ""; el.style.minHeight = "";
+}
+function revealAll(){ document.querySelectorAll("[data-build]").forEach(revealNow); root.classList.remove("sw-pending"); }
+
+function finish(fast){
+  if (!run) return;
+  const r = run; run = null;
+  cancelAnimationFrame(r.raf);
+  r.targets.forEach(revealNow);
+  revealAll();
+  skipBtn.hidden = true;
+  if (fast){ r.layer.remove(); return; }
+  r.layer.style.opacity = "0";
+  setTimeout(() => r.layer.remove(), 650);
+}
+
+function spawn(){
+  finish(true);
+  const layer = document.createElement("div");
+  layer.className = "sw-layer";
+  document.body.appendChild(layer);
+  const names = [...CONFIG.names].sort(() => Math.random() - .5);
+  const cursors = [];
+  for (let i = 0; i < Math.min(CONFIG.cursors, names.length); i++){
+    const color = CONFIG.colors[i % CONFIG.colors.length];
+    const el = document.createElement("div");
+    el.className = "sw-cursor";
+    el.innerHTML = arrowSVG(color) + '<span class="sw-name" style="background:' + color + '">' + names[i] + '</span>';
+    layer.appendChild(el);
+    const side = Math.floor(Math.random()*4);
+    const x = side === 0 ? -40 : side === 1 ? innerWidth + 40 : rand(0, innerWidth);
+    const y = side === 2 ? -40 : side === 3 ? innerHeight + 40 : rand(0, innerHeight);
+    cursors.push({ el, color, x, y, vx: 0, vy: 0, job: null, phase: "idle", t: 0, wait: rand(.1, .6), seed: rand(0, 1000) });
+  }
+  run = { layer, cursors, targets: [], queue: [], waiting: true, last: performance.now(), raf: 0, leaving: false, time: 0 };
+  run.raf = requestAnimationFrame(tick);
+}
+
+function build(panel){
+  if (!run) spawn();
+  const all = [...panel.querySelectorAll("[data-build]")];
+  const targets = all.filter(inView);
+  all.filter(el => !targets.includes(el)).forEach(revealNow);
+  targets.forEach(el => el.classList.add("sw-hidden"));
+  root.classList.remove("sw-pending");
+  run.targets = targets; run.queue = [...targets]; run.waiting = false;
+  skipBtn.hidden = false;
+}
+
+function steer(c, tx, ty, k, gentle){
+  const dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy) || 1;
+  const want = Math.min(CONFIG.maxSpeed * (gentle ? .45 : 1), d * .16);
+  c.vx += (dx/d*want - c.vx) * .22 * k;
+  c.vy += (dy/d*want - c.vy) * .22 * k;
+  return d;
+}
+function flock(c, k, cx, cy, rx, ry){
+  let sx = 0, sy = 0, ax = 0, ay = 0, n = 0;
+  for (const o of run.cursors){
+    if (o === c || o.phase !== "idle") continue;
+    const dx = c.x - o.x, dy = c.y - o.y, d = Math.hypot(dx, dy);
+    if (d < 140){ ax += o.vx; ay += o.vy; n++; }
+    if (d < 42 && d > 0){ sx += dx/d * (42-d); sy += dy/d * (42-d); }
+  }
+  const w = run.time * .8 + c.seed;
+  steer(c, cx + Math.cos(w)*rx, cy + Math.sin(w*1.3)*ry, k, true);
+  if (n){ c.vx += (ax/n - c.vx) * .04 * k; c.vy += (ay/n - c.vy) * .04 * k; }
+  c.vx += sx * .02 * k; c.vy += sy * .02 * k;
+}
+function caretPoint(node, rect){
+  if (node.data.length){
+    const rg = document.createRange();
+    rg.setStart(node, node.data.length - 1); rg.setEnd(node, node.data.length);
+    const rs = rg.getClientRects();
+    if (rs.length){ const r = rs[rs.length-1]; return [r.right + 2, r.top + r.height*.55]; }
+  }
+  return [rect.left, rect.top + 12];
+}
+function sizeBox(box, r){ Object.assign(box.style, { left: r.left+"px", top: r.top+"px", width: r.width+"px", height: r.height+"px" }); }
+
+function work(c, dt, k){
+  const job = c.job, el = job.el, r = el.getBoundingClientRect();
+  if (c.phase === "go"){
+    if (steer(c, r.left, r.top, k) < 7){
+      c.phase = "draw"; c.t = 0;
+      job.box = document.createElement("div");
+      job.box.className = "sw-box";
+      job.box.style.color = c.color; job.box.style.borderColor = c.color;
+      run.layer.appendChild(job.box);
+    }
+    return;
+  }
+  if (c.phase === "draw"){
+    c.t = Math.min(1, c.t + dt / .5);
+    const e = ease(c.t), w = r.width*e, h = r.height*e;
+    Object.assign(job.box.style, { left: r.left+"px", top: r.top+"px", width: w+"px", height: h+"px" });
+    c.x = r.left + w; c.y = r.top + h; c.vx = c.vy = 0;
+    if (c.t >= 1){
+      c.t = 0;
+      el.classList.remove("sw-hidden");
+      if (el.dataset.build === "type"){
+        c.phase = "type";
+        el.dataset.full = el.textContent;
+        el.style.minHeight = r.height + "px";
+        el.textContent = "";
+        job.node = document.createTextNode("");
+        el.appendChild(job.node);
+        job.dur = Math.max(.35, Math.min(1.6, el.dataset.full.length / 48));
+      } else {
+        c.phase = "fill";
+        el.style.clipPath = "inset(0 100% 0 0)";
+      }
+    }
+    return;
+  }
+  if (c.phase === "type"){
+    c.t = Math.min(1, c.t + dt / job.dur);
+    const full = el.dataset.full;
+    job.node.data = full.slice(0, Math.round(full.length * c.t));
+    const [px, py] = caretPoint(job.node, r);
+    c.x += (px - c.x) * .5; c.y += (py - c.y) * .5;
+    sizeBox(job.box, r);
+    if (c.t >= 1) done(c);
+    return;
+  }
+  if (c.phase === "fill"){
+    c.t = Math.min(1, c.t + dt / .55);
+    const e = ease(c.t);
+    el.style.clipPath = "inset(0 " + ((1-e)*100).toFixed(2) + "% 0 0)";
+    c.x = r.left + r.width*e; c.y = r.top + r.height*.5 + Math.sin(e*Math.PI*3)*r.height*.3;
+    sizeBox(job.box, r);
+    if (c.t >= 1) done(c);
+  }
+}
+function done(c){
+  const box = c.job.box;
+  revealNow(c.job.el);
+  box.style.opacity = "0";
+  setTimeout(() => box.remove(), 500);
+  c.job = null; c.phase = "idle"; c.wait = rand(.05, .35);
+  c.vx = rand(-6, 6); c.vy = rand(-6, -2);
+}
+
+function tick(now){
+  if (!run) return;
+  const dt = Math.min(.05, (now - run.last) / 1000); run.last = now; run.time += dt;
+  const k = dt * 60;
+  const busy = run.cursors.filter(c => c.job);
+  let cx = innerWidth/2, cy = innerHeight/2, rx = Math.min(innerWidth*.42, 420), ry = innerHeight*.36;
+  if (!run.waiting){
+    rx = 120; ry = 70; cy = innerHeight*.45;
+    if (busy.length){ cx = busy.reduce((s,c) => s + c.x, 0)/busy.length; cy = busy.reduce((s,c) => s + c.y, 0)/busy.length; }
+  }
+  for (const c of run.cursors){
+    if (run.leaving) steer(c, c.exitX, c.exitY, k);
+    else if (c.job) work(c, dt, k);
+    else {
+      c.wait -= dt;
+      if (!run.waiting && c.wait <= 0 && run.queue.length){ c.job = { el: run.queue.shift() }; c.phase = "go"; }
+      else flock(c, k, cx, cy, rx, ry);
+    }
+    if (c.phase === "idle" || c.phase === "go" || run.leaving){ c.x += c.vx * k; c.y += c.vy * k; }
+    c.el.style.transform = "translate(" + c.x.toFixed(1) + "px," + c.y.toFixed(1) + "px)";
+  }
+  if (!run.waiting && !run.leaving && !run.queue.length && run.cursors.every(c => !c.job)){
+    run.leaving = true; run.leaveAt = run.time;
+    for (const c of run.cursors){
+      const a = Math.atan2(c.y - innerHeight/2, c.x - innerWidth/2);
+      c.exitX = c.x + Math.cos(a) * innerWidth; c.exitY = c.y + Math.sin(a) * innerHeight;
+    }
+  }
+  if (run.leaving && run.time - run.leaveAt > 1.1){ finish(false); return; }
+  run.raf = requestAnimationFrame(tick);
+}
+
+/* ---------- tabs (hash routing) ---------- */
+function showTab(animate){
+  const key = TABS[location.hash.slice(1)] ? location.hash.slice(1) : "portfolio";
+  document.querySelectorAll("nav [role=tab]").forEach(a => a.setAttribute("aria-selected", a.getAttribute("href") === "#" + key ? "true" : "false"));
+  document.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== key);
+  if (animate && mode === "watch" && canAnimate()){ finish(true); build(activePanel()); }
+  else { finish(true); revealAll(); }
+}
+addEventListener("hashchange", () => { showTab(true); scrollTo(0, 0); });
+
+/* ---------- welcome menu ---------- */
+function closeMenu(){
+  menu.classList.add("out");
+  setTimeout(() => { menu.hidden = true; menu.classList.remove("out"); }, 450);
+}
+function choose(choice){
+  if (document.getElementById("remember").checked) setChoice(choice);
+  mode = choice;
+  closeMenu();
+  if (choice === "watch"){ build(activePanel()); }
+  else { revealAll(); if (run){ run.waiting = false; } }
+}
+document.getElementById("watchBtn").addEventListener("click", () => choose("watch"));
+document.getElementById("skipMenuBtn").addEventListener("click", () => choose("skip"));
+skipBtn.addEventListener("click", () => finish(true));
+replayBtn.addEventListener("click", () => {
+  if (!canAnimate()) return;
+  mode = "watch"; scrollTo(0, 0); finish(true); build(activePanel());
+});
+
+showTab(false);
+if (canAnimate()){
+  const saved = getChoice();
+  if (saved === "watch"){ mode = "watch"; root.classList.add("sw-pending"); build(activePanel()); }
+  else if (saved === "skip"){ mode = "skip"; revealAll(); }
+  else {
+    root.classList.add("sw-pending");
+    menu.hidden = false;
+    spawn();
+    document.getElementById("watchBtn").focus();
+  }
+} else {
+  replayBtn.hidden = true;
+  revealAll();
+}
+}
+</script>
+</body>
+</html>
