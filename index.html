@@ -52,7 +52,8 @@ a.card:hover{transform:translateY(-3px);border-color:var(--accent)}
 .card h3{margin:0 0 6px;font-size:19px;line-height:1.25}
 .card p{margin:0;color:var(--muted);font-size:15px;flex:1}
 .card .meta{margin-top:14px;font-size:13px;font-weight:600;color:var(--accent)}
-a.card .meta::after{content:" ↗"}
+a.card[target] .meta::after{content:" ↗"}
+a.card:not([target]) .meta::after{content:" →"}
 
 /* ---------- welcome menu ---------- */
 .menu{position:fixed;inset:0;z-index:8800;display:grid;place-items:center;padding:24px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);transition:opacity .45s}
@@ -128,7 +129,7 @@ const TABS = {
   projects:  { kicker: "Projects", title: "Things I've built.",
     lede: "Apps, sites and browser extensions. Tap a card to open it." },
   tools:     { kicker: "Tools", title: "My multitool.",
-    lede: "Quality-of-life tools, school helpers and interactive explainers I've made." }
+    lede: "Quality-of-life tools and interactive explainers I've built. Tap one to open it." }
 };
 
 const ITEMS = [
@@ -140,26 +141,22 @@ const ITEMS = [
   { tab:"projects", group:"Apps & sites", title:"Claude Wrapped 2026", desc:"A year-in-review of my Claude usage, with a builder so anyone can make their own from their data export.", tag:"Web app", link:"https://claude.ai/artifact/62g6UCvYadtuKAhQWCbC8y" },
   { tab:"projects", group:"Apps & sites", title:"Coin pusher game", desc:"A mobile coin-pusher idle game with upgrades and a satisfying push.", tag:"Game · in progress", link:"" },
   { tab:"projects", group:"Apps & sites", title:"This website", desc:"Hand-built portfolio with a custom swarm-cursor intro.", tag:"Site", link:"https://github.com/connorbstine/portfolio" },
+  { tab:"projects", group:"Browser extensions", title:"FocusForge", desc:"A Chrome focus tool that blocks distracting sites (hard block, redirect, or a 60-second delay with reflection prompts), tracks streaks, and turns the new tab into a focus dashboard.", tag:"Chrome extension · in progress", link:"" },
   { tab:"projects", group:"Browser extensions", title:"Hypeddit Auto-Gate", desc:"A Chrome extension that clears Hypeddit free-download gates for SoundCloud tracks.", tag:"Chrome extension", link:"" },
 
   { tab:"tools", group:"Everyday tools", title:"Snap-Ready Video Fixer", desc:"Gets videos ready to post without the upload headaches.", tag:"Video", link:"https://claude.ai/artifact/UhYSUGUGkypUnbzGcb76Na" },
   { tab:"tools", group:"Everyday tools", title:"Instagram Follow Tracker", desc:"Import your Instagram export and see who unfollowed, who followed, and who doesn't follow back.", tag:"Social", link:"https://claude.ai/artifact/BJ2utWJLdPbzJgxhjsccFH" },
-  { tab:"tools", group:"Everyday tools", title:"IV Calculator", desc:"A quick calculator I built for myself.", tag:"Calculator", link:"https://claude.ai/artifact/L2wCLMAUY5cLxLaGrXax5z" },
-  { tab:"tools", group:"Everyday tools", title:"Résumé Screen Check", desc:"Scores a résumé against a job posting, shows missing keywords, and suggests honest rewrites.", tag:"Uses AI", link:"https://claude.ai/artifact/TWUMN1GSSDLyRaJF4C3xa7" },
-  { tab:"tools", group:"Interactive explainers", title:"The Human Heart · 3D", desc:"An interactive 3D heart you can spin and explore.", tag:"Anatomy", link:"https://claude.ai/artifact/PoJXSLvBK5u5nVQB5CP2VB" },
-  { tab:"tools", group:"Interactive explainers", title:"Neuron · Action Potential", desc:"Simulate how a neuron fires, step by step.", tag:"Biology", link:"https://claude.ai/artifact/KED9hELNzGfqKfXkS5EH6C" },
-  { tab:"tools", group:"Interactive explainers", title:"How a Polaroid Works", desc:"A take-apart teardown of an instant camera.", tag:"Teardown", link:"https://claude.ai/artifact/Nzg3gMi6ob79fHCLAvSLjj" },
-  { tab:"tools", group:"Interactive explainers", title:"Spinning Gear", desc:"An exploded-view test of a spinning gear.", tag:"3D test", link:"https://claude.ai/artifact/BUPA7UtdgRuR3FKKw914tu" },
-  { tab:"tools", group:"School", title:"Learning Note Sheet", desc:"PSYC 101 notes on classical and operant conditioning, in lecture order.", tag:"Notes", link:"https://claude.ai/artifact/1gUq24UY7aFWzH1Zr71KLg" },
-  { tab:"tools", group:"School", title:"Patient Zero Vision", desc:"A speculative write-up: a world where you can see your own infections.", tag:"Writing", link:"https://claude.ai/artifact/NRYSZmZKDY2qjtb3v1UXwx" }
+  { tab:"tools", group:"Interactive explainers", title:"The Human Heart · 3D", desc:"An interactive 3D heart you can spin and explore.", tag:"Anatomy", link:"tools/heart/" },
+  { tab:"tools", group:"Interactive explainers", title:"Neuron · Action Potential", desc:"Simulate how a neuron fires, step by step.", tag:"Biology", link:"tools/neuron/" },
 ];
 
 /* ---------- render ---------- */
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const card = it => {
   const inner = '<h3>' + esc(it.title) + '</h3><p>' + esc(it.desc) + '</p><span class="meta">' + esc(it.tag) + '</span>';
+  const ext = /^https?:/.test(it.link);
   return it.link
-    ? '<a class="card" data-build="box" href="' + esc(it.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+    ? '<a class="card" data-build="box" href="' + esc(it.link) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
     : '<article class="card" data-build="box">' + inner + '</article>';
 };
 document.getElementById("main").innerHTML = Object.keys(TABS).map(key => {
