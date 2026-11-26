@@ -70,6 +70,8 @@ a.card:not([target]) .meta::after{content:" →"}
 .btn small{display:block;font-weight:500;font-size:13px;opacity:.75}
 .remember{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:14px;color:var(--muted);cursor:pointer;min-height:44px}
 .remember input{width:18px;height:18px;accent-color:var(--accent)}
+.saved-note{margin:4px 0 0;font-size:13px;color:var(--muted)}
+.saved-note button{all:unset;cursor:pointer;color:var(--accent);font-weight:600;text-decoration:underline;padding:6px 2px}
 
 /* ---------- swarm ---------- */
 .sw-pending [data-build]{opacity:0}
@@ -110,16 +112,18 @@ a.card:not([target]) .meta::after{content:" →"}
     <div class="menu-name" id="menuName">Connor Stine<span>.</span></div>
     <p class="menu-sub">Projects, apps and little tools I've built. Want to watch the site build itself?</p>
     <div class="menu-actions">
-      <button class="btn primary" id="watchBtn">Watch it build<small>About 10 seconds</small></button>
+      <button class="btn primary" id="watchBtn">Watch it build<small>About 4 seconds</small></button>
       <button class="btn" id="skipMenuBtn">Skip to the site</button>
     </div>
     <label class="remember"><input type="checkbox" id="remember"> Remember my choice</label>
+    <p class="saved-note" id="savedNote" hidden></p>
   </div>
 </div>
 
 <div class="sw-controls">
   <button class="pill" id="swSkip" hidden>Skip</button>
   <button class="pill" id="swReplay">Replay build</button>
+  <button class="pill" id="swSettings" title="Change or forget your intro choice">Intro settings</button>
 </div>
 
 <script>
@@ -202,9 +206,7 @@ const USE_SWARM = true;
 /* SWARM SITE MODE (read by vendor/swarm.js when it loads; see CLAUDE.md for notes):
    the toolbar is a small top-left pill, building starts instantly, and these options apply. */
 window.__swarmSite = {
-  seconds: 1.9,       // time budget: the build speeds up to finish in about this long
-  minSpeed: 3,        // never slower than 3x the original speed
-  maxSpeed: 14,       // never faster than 14x
+  speed: 3,           // the original Swarm speed x3 (same as its "3x" button); 1 = original
   autoScroll: true,   // scroll down by itself while the cursors build
   autoReveal: true,   // fade back to the real page when the build is done
   revealDelay: 150,   // ms to hold the finished build before fading
@@ -227,6 +229,7 @@ function playIntro(){ if (USE_SWARM) realSwarm(); else build(activePanel()); }
 
 function getChoice(){ try { return localStorage.getItem(KEY); } catch (e) { return null; } }
 function setChoice(v){ try { localStorage.setItem(KEY, v); } catch (e) {} }
+function clearChoice(){ try { localStorage.removeItem(KEY); } catch (e) {} }
 function canAnimate(){ return window.SWARM_ENABLED && !reduceMotion; }
 function activePanel(){ return document.querySelector(".panel:not([hidden])"); }
 
@@ -428,7 +431,8 @@ function closeMenu(){
   setTimeout(() => { menu.hidden = true; menu.classList.remove("out"); }, 450);
 }
 function choose(choice){
-  if (document.getElementById("remember").checked) setChoice(choice);
+  // ticked = remember this choice; unticked = forget any saved choice and ask again next time
+  if (document.getElementById("remember").checked) setChoice(choice); else clearChoice();
   mode = choice;
   closeMenu();
   if (choice === "watch"){ playIntro(); }
@@ -437,14 +441,37 @@ function choose(choice){
 document.getElementById("watchBtn").addEventListener("click", () => choose("watch"));
 document.getElementById("skipMenuBtn").addEventListener("click", () => choose("skip"));
 skipBtn.addEventListener("click", () => finish(true));
+/* Intro settings: reopen the welcome menu to change or forget the saved choice */
+const savedNote = document.getElementById("savedNote");
+function openMenu(){
+  finish(true); revealAll();
+  const saved = getChoice();
+  document.getElementById("remember").checked = !!saved;
+  if (saved){
+    savedNote.innerHTML = 'Saved: <b>' + (saved === "watch" ? "always watch" : "always skip") + '</b> · <button type="button" id="forgetBtn">Forget it</button>';
+    document.getElementById("forgetBtn").addEventListener("click", () => {
+      clearChoice();
+      document.getElementById("remember").checked = false;
+      savedNote.textContent = "Forgotten. You'll be asked each visit.";
+    });
+  } else savedNote.textContent = "Nothing saved. You'll be asked each visit.";
+  savedNote.hidden = false;
+  menu.hidden = false;
+  document.getElementById("watchBtn").focus();
+}
+document.getElementById("swSettings").addEventListener("click", openMenu);
+addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden && savedNote.hidden === false){ closeMenu(); } });
 replayBtn.addEventListener("click", () => {
   if (!canAnimate()) return;
   mode = "watch"; scrollTo(0, 0); finish(true); playIntro();
 });
 
 showTab(false);
+/* Testing: add ?menu to the address (connorbstine.github.io/portfolio/?menu) to always get the
+   welcome menu, ignoring any saved choice. */
+const forceMenu = new URLSearchParams(location.search).has("menu");
 if (canAnimate()){
-  const saved = getChoice();
+  const saved = forceMenu ? null : getChoice();
   if (saved === "watch"){ mode = "watch"; playIntro(); }
   else if (saved === "skip"){ mode = "skip"; revealAll(); }
   else {
@@ -455,6 +482,7 @@ if (canAnimate()){
   }
 } else {
   replayBtn.hidden = true;
+  document.getElementById("swSettings").hidden = true;
   revealAll();
 }
 }

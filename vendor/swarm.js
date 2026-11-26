@@ -9,7 +9,8 @@
  *   autoScroll  - scroll down by itself while building (the Tour feature, always on)
  *   autoReveal  - fade back to the real page as soon as the build finishes
  *   returnToTop - scroll back to the top once the real page is showing
- *   seconds     - time budget: speeds the build up so it finishes in about this long
+ *   speed       - fixed build speed, same as the extension's speed button (3 = its 3x setting)
+ *   seconds     - optional time budget instead of a fixed speed: speeds the build up so it finishes in about this long
  *   minSpeed / maxSpeed - limits for that speed-up (1 = the extension's normal speed)
  * In site mode the bottom toolbar becomes a small status pill in the top-left corner
  * (agents, layers, sound, Skip), and the blank "page dissolving" opening is skipped so
@@ -3606,6 +3607,7 @@
       if (wait > 0) await sleep(wait);
       if (this.dead) return;
       if (SITE && SITE.autoScroll) this.tour = true; // SITE MODE: auto-scroll while building
+      if (SITE && SITE.speed) this.engine.speed = SITE.speed; // SITE MODE: fixed speed (like the 3x button)
       this.engine.start();
     }
 
