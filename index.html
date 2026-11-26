@@ -40,7 +40,7 @@ nav{display:flex;gap:6px;flex-wrap:wrap}
 nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font:500 15px Inter,sans-serif;text-decoration:none}
 nav a[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-main{max-width:1100px;margin:0 auto;padding:clamp(32px,6vw,80px) max(5vw,16px) 140px}
+main{max-width:1100px;margin:0 auto;padding:clamp(32px,6vw,80px) max(5vw,16px) 56px}
 .panel[hidden]{display:none}
 .kicker{display:inline-block;font-size:14px;font-weight:600;color:var(--accent);margin-bottom:6px}
 h1{font-size:clamp(40px,8vw,72px);line-height:1.04;margin:0 0 18px;text-wrap:balance}
@@ -83,6 +83,9 @@ a.card:not([target]) .meta::after{content:" →"}
 .sw-controls{position:fixed;right:16px;bottom:16px;z-index:9500;display:flex;gap:8px}
 .pill{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:500 14px Inter,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .pill[hidden]{display:none}
+.credit{max-width:1100px;margin:0 auto;padding:24px max(5vw,16px) 96px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.credit p{margin:0;max-width:70ch}
+.credit a{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -96,6 +99,10 @@ a.card:not([target]) .meta::after{content:" →"}
 </header>
 
 <main id="main"></main>
+
+<footer class="credit">
+  <p>Intro animation: <a href="https://califa.github.io/swarm-site/" target="_blank" rel="noopener">Swarm</a> by <a href="https://joelcalifa.com" target="_blank" rel="noopener">Joel Califa</a>, used with permission, via <a href="https://github.com/DhvanilPatel/swarm-cursors" target="_blank" rel="noopener">Swarm Rebuild</a> by Dhvanil Patel.</p>
+</footer>
 
 <div class="menu" id="menu" hidden role="dialog" aria-modal="true" aria-labelledby="menuName">
   <div class="menu-card">
@@ -188,6 +195,24 @@ const replayBtn = document.getElementById("swReplay");
 const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
 const rand = (a,b) => a + Math.random()*(b-a);
 let run = null, mode = "skip";
+
+/* OFFICIAL SWARM: true = Joel Califa's Swarm (vendor/swarm.js, used with permission).
+   false = the built-in original intro below. */
+const USE_SWARM = true;
+function realSwarm(){
+  finish(true); revealAll();
+  menu.hidden = true; menu.classList.remove("out");
+  scrollTo(0, 0);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const sw = window.__swarmRebuild;
+    if (sw){ if (!sw.app) sw.start(); return; }
+    const s = document.createElement("script");
+    s.src = "vendor/swarm.js";
+    s.onerror = () => build(activePanel());
+    document.body.appendChild(s);
+  }));
+}
+function playIntro(){ if (USE_SWARM) realSwarm(); else build(activePanel()); }
 
 function getChoice(){ try { return localStorage.getItem(KEY); } catch (e) { return null; } }
 function setChoice(v){ try { localStorage.setItem(KEY, v); } catch (e) {} }
@@ -381,7 +406,7 @@ function showTab(animate){
   const key = TABS[location.hash.slice(1)] ? location.hash.slice(1) : "portfolio";
   document.querySelectorAll("nav [role=tab]").forEach(a => a.setAttribute("aria-selected", a.getAttribute("href") === "#" + key ? "true" : "false"));
   document.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== key);
-  if (animate && mode === "watch" && canAnimate()){ finish(true); build(activePanel()); }
+  if (animate && mode === "watch" && canAnimate() && !USE_SWARM){ finish(true); build(activePanel()); }
   else { finish(true); revealAll(); }
 }
 addEventListener("hashchange", () => { showTab(true); scrollTo(0, 0); });
@@ -395,7 +420,7 @@ function choose(choice){
   if (document.getElementById("remember").checked) setChoice(choice);
   mode = choice;
   closeMenu();
-  if (choice === "watch"){ build(activePanel()); }
+  if (choice === "watch"){ playIntro(); }
   else { revealAll(); if (run){ run.waiting = false; } }
 }
 document.getElementById("watchBtn").addEventListener("click", () => choose("watch"));
@@ -403,13 +428,13 @@ document.getElementById("skipMenuBtn").addEventListener("click", () => choose("s
 skipBtn.addEventListener("click", () => finish(true));
 replayBtn.addEventListener("click", () => {
   if (!canAnimate()) return;
-  mode = "watch"; scrollTo(0, 0); finish(true); build(activePanel());
+  mode = "watch"; scrollTo(0, 0); finish(true); playIntro();
 });
 
 showTab(false);
 if (canAnimate()){
   const saved = getChoice();
-  if (saved === "watch"){ mode = "watch"; root.classList.add("sw-pending"); build(activePanel()); }
+  if (saved === "watch"){ mode = "watch"; playIntro(); }
   else if (saved === "skip"){ mode = "skip"; revealAll(); }
   else {
     root.classList.add("sw-pending");
