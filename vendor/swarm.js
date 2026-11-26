@@ -9,6 +9,8 @@
  *   autoScroll  - scroll down by itself while building (the Tour feature, always on)
  *   autoReveal  - fade back to the real page as soon as the build finishes
  *   returnToTop - scroll back to the top once the real page is showing
+ *   seconds     - time budget: speeds the build up so it finishes in about this long
+ *   minSpeed / maxSpeed - limits for that speed-up (1 = the extension's normal speed)
  * In site mode the bottom toolbar becomes a small status pill in the top-left corner
  * (agents, layers, sound, Skip), and the blank "page dissolving" opening is skipped so
  * the cursors start building right away. Every change is marked with SITE MODE.
@@ -3734,6 +3736,7 @@
       const dt = Math.min(0.05, (now - this.last) / 1000);
       this.last = now;
       try {
+        if (SITE && SITE.seconds) this.pace(); // SITE MODE: fit the build into the time budget
         this.engine.step(dt);
         if (this.tour) this.tourStep(dt);
         this.view.render(this.engine);
@@ -3748,6 +3751,24 @@
       this.raf = requestAnimationFrame((t) => this.frame(t));
     }
 
+    // SITE MODE: speed the whole build up or down so it finishes in about SITE.seconds,
+    // however many layers the page has. Every move, typing step and draw runs on engine.tempo,
+    // which is multiplied by engine.speed.
+    pace() {
+      const E = this.engine;
+      if (!E.started || this.complete) return;
+      const B = SITE.seconds;
+      const el = E.time - E.startTime;
+      const total = Math.max(1, E.tasks.length);
+      const done = E.doneCount;
+      const base = SITE.minSpeed || 3;
+      // layers left versus time left (aim to be done a little early), plus a push once over budget
+      const left = Math.max(0.15, B * 0.92 - el);
+      const need = ((total - done) / total) * (B / left);
+      const over = Math.max(0, el - B) * 4;
+      E.speed = Math.min(SITE.maxSpeed || 14, Math.max(base, base * need + over));
+    }
+
     tourStep(dt) {
       const E = this.engine;
       if (!E.started) return;
@@ -3755,6 +3776,18 @@
       const maxY = this.env.scrollHeight() - g.vh;
       if (g.sy >= maxY - 1) {
         this.tourV = 0;
+        return;
+      }
+      if (SITE && SITE.seconds) {
+        // SITE MODE: reach the bottom by about 70% of the time budget, so the last screen still gets built
+        const left = Math.max(0.2, SITE.seconds * 0.7 - (E.time - E.startTime));
+        const v = Math.max(120, (maxY - g.sy) / left);
+        this.tourAcc += v * dt;
+        if (this.tourAcc >= 1) {
+          const d = Math.floor(this.tourAcc);
+          this.tourAcc -= d;
+          this.env.scrollBy(d);
+        }
         return;
       }
       const crew = Math.max(MIN_AGENTS, E.cursors.filter((c) => !c.leaving).length);
@@ -3842,10 +3875,13 @@
           c.follow = false;
         }
         this.view.hud.classList.remove("on");
+        // SITE MODE: quicker fade back to the real page
+        const fadeAt = SITE ? 120 : 450;
+        if (SITE) this.view.host.style.setProperty("transition", "opacity .4s ease", "important");
         setTimeout(() => {
           this.view.host.style.setProperty("opacity", "0", "important");
-        }, 450);
-        setTimeout(finish, 1150);
+        }, fadeAt);
+        setTimeout(finish, fadeAt + (SITE ? 420 : 700));
       } else {
         this.view.host.style.setProperty("transition", "opacity .25s ease", "important");
         this.view.host.style.setProperty("opacity", "0", "important");

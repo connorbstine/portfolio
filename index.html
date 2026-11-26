@@ -202,9 +202,12 @@ const USE_SWARM = true;
 /* SWARM SITE MODE (read by vendor/swarm.js when it loads; see CLAUDE.md for notes):
    the toolbar is a small top-left pill, building starts instantly, and these options apply. */
 window.__swarmSite = {
+  seconds: 1.9,       // time budget: the build speeds up to finish in about this long
+  minSpeed: 3,        // never slower than 3x the original speed
+  maxSpeed: 14,       // never faster than 14x
   autoScroll: true,   // scroll down by itself while the cursors build
   autoReveal: true,   // fade back to the real page when the build is done
-  revealDelay: 900,   // ms to hold the finished build before fading
+  revealDelay: 150,   // ms to hold the finished build before fading
   returnToTop: true   // scroll back to the top afterwards
 };
 function realSwarm(){

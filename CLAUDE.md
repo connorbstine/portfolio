@@ -23,6 +23,10 @@ Plain static site: no build step. Push to `main` and it is live in 1 to 2 minute
 - `index.html` sets `window.__swarmSite` before loading `vendor/swarm.js`. That turns on SITE MODE:
   no bottom toolbar (a small top-left pill instead: agents, layers, sound, Skip), no blank opening,
   auto-scroll while building, auto fade back to the real page, then scroll to top.
+- Speed: `seconds` in `window.__swarmSite` is a time budget (currently 1.9s). The build runs at
+  `minSpeed` (3x) and speeds up, up to `maxSpeed`, if a page has more layers than fit in the budget.
+  Auto-scroll is paced to reach the bottom by about 70% of the budget. Measured Nov 2026: tap to real
+  page in 2.4 to 3.0 seconds on every tab, laptop and phone. Connor wants it at 3 seconds or less.
 - Every change to `vendor/swarm.js` is marked with a `SITE MODE` comment. If the upstream file is ever
   updated, re-apply those blocks. With `window.__swarmSite` unset it behaves like the extension.
 - `USE_SWARM = false` in `index.html` switches back to the simpler built-in intro (the `build()` engine).
