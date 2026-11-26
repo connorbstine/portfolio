@@ -199,6 +199,14 @@ let run = null, mode = "skip";
 /* OFFICIAL SWARM: true = Joel Califa's Swarm (vendor/swarm.js, used with permission).
    false = the built-in original intro below. */
 const USE_SWARM = true;
+/* SWARM SITE MODE (read by vendor/swarm.js when it loads; see CLAUDE.md for notes):
+   the toolbar is a small top-left pill, building starts instantly, and these options apply. */
+window.__swarmSite = {
+  autoScroll: true,   // scroll down by itself while the cursors build
+  autoReveal: true,   // fade back to the real page when the build is done
+  revealDelay: 900,   // ms to hold the finished build before fading
+  returnToTop: true   // scroll back to the top afterwards
+};
 function realSwarm(){
   finish(true); revealAll();
   menu.hidden = true; menu.classList.remove("out");

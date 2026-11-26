@@ -4,7 +4,14 @@
  *   Swarm by Joel Califa (https://califa.github.io/swarm-site/), used with his permission.
  * Page-snapshot adaptation:
  *   Swarm Rebuild by Dhvanil Patel (https://github.com/DhvanilPatel/swarm-cursors).
- * Unmodified copy of swarm-rebuild/swarm.js.
+ * Based on swarm-rebuild/swarm.js v1.2.0, with a SITE MODE added for this website.
+ * Site mode is switched on by window.__swarmSite (set in index.html before this file loads):
+ *   autoScroll  - scroll down by itself while building (the Tour feature, always on)
+ *   autoReveal  - fade back to the real page as soon as the build finishes
+ *   returnToTop - scroll back to the top once the real page is showing
+ * In site mode the bottom toolbar becomes a small status pill in the top-left corner
+ * (agents, layers, sound, Skip), and the blank "page dissolving" opening is skipped so
+ * the cursors start building right away. Every change is marked with SITE MODE.
  */
 /*
  * Swarm Rebuild
@@ -20,6 +27,8 @@
   "use strict";
 
   const KEY = "__swarmRebuild";
+  // SITE MODE: options from the host page (null = behave exactly like the extension)
+  const SITE = window.__swarmSite || null;
   if (window[KEY]) {
     window[KEY].toggle();
     return;
@@ -1551,6 +1560,12 @@
 .hud button.snd.tap{background:#0D99FF;animation:hudpulse 1.6s ease-in-out infinite}
 @keyframes hudpulse{50%{box-shadow:0 0 0 4px rgba(13,153,255,.28)}}
 .hud.hidden{opacity:0 !important;transform:translate(-50%,24px) !important;pointer-events:none !important}
+.hud.site{left:28px;top:28px;bottom:auto;transform:translate(0,-10px);gap:8px;padding:5px 5px 5px 8px;border-radius:10px}
+.hud.site.on{transform:none}
+.hud.site [data-a=tour],.hud.site [data-a=speed],.hud.site [data-a=hide],.hud.site [data-a=live],.hud.site [data-a=replay]{display:none!important}
+.hud.site .bar{width:44px}
+.hud.site .x{color:#fff;padding:7px 10px}
+@media (max-width:560px){.hud.site{left:10px;top:10px;max-width:calc(100% - 20px);gap:6px}.hud.site .bar,.hud.site .dots{display:none}}
 .hud-unhide{all:unset;position:absolute;left:50%;bottom:16px;transform:translate(-50%,14px);opacity:0;pointer-events:none;padding:6px 12px;background:rgba(30,30,30,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#cfcfcf;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25),inset 0 0 0 1px rgba(255,255,255,.07);font:500 11px/1 Inter,system-ui,-apple-system,sans-serif;cursor:pointer;transition:opacity .3s ease,transform .3s ease,background .15s,color .15s;z-index:6;user-select:none;box-sizing:border-box}
 .hud-unhide:hover{background:#3a3a3a;color:#fff}
 .hud-unhide.visible{opacity:1;transform:translate(-50%,0);pointer-events:auto}
@@ -1679,6 +1694,13 @@
       this.cursorsEl = $(".cursors");
       this.rulers = $(".rulers");
       this.hud = $(".hud");
+      if (SITE) {
+        // SITE MODE: top-left pill instead of the bottom toolbar
+        this.hud.classList.add("site");
+        const x = this.hud.querySelector('[data-a="close"]');
+        x.textContent = "Skip";
+        x.title = "Skip the intro (Esc)";
+      }
       this.unhideBtn = $(".hud-unhide");
       this.status = $(".status");
       this.barFill = $(".bar i");
@@ -3542,16 +3564,17 @@
       this.raf = requestAnimationFrame((t) => this.frame(t));
       await nextFrame();
       this.renderSoundBtn();
-      this.sfx.intro();
+      // SITE MODE: no "page dissolving" opening (logo, swell, half-second pause, scan scroll)
+      if (!SITE) this.sfx.intro();
       this.view.bg.classList.add("on");
-      this.view.intro.classList.add("on");
+      if (!SITE) this.view.intro.classList.add("on");
       this.view.hud.classList.add("on");
       const mark = (k) => (this.timing[k] = Math.round(performance.now() - this.t0));
-      await sleep(520);
+      if (!SITE) await sleep(520);
       await unhidePage();
       mark("blank");
       if (this.dead) return;
-      await this.scan();
+      if (!SITE) await this.scan();
       mark("scan");
       if (this.dead) return;
       try {
@@ -3577,9 +3600,10 @@
       this.engine.setModel(model);
       this.model = model;
       mark("mount");
-      const wait = 1500 - (performance.now() - this.t0);
+      const wait = SITE ? 0 : 1500 - (performance.now() - this.t0);
       if (wait > 0) await sleep(wait);
       if (this.dead) return;
+      if (SITE && SITE.autoScroll) this.tour = true; // SITE MODE: auto-scroll while building
       this.engine.start();
     }
 
@@ -3786,6 +3810,8 @@
       v.root.querySelector('[data-a="tour"]').hidden = true;
       v.root.querySelector('[data-a="speed"]').hidden = true;
       this.tour = false;
+      // SITE MODE: fade straight back to the real page
+      if (SITE && SITE.autoReveal) setTimeout(() => { if (app === this) stop(true); }, SITE.revealDelay || 900);
     }
 
     destroy(reveal) {
@@ -3805,6 +3831,8 @@
         cancelAnimationFrame(this.raf);
         for (const u of this.unbinds || []) u();
         this.view.host.remove();
+        // SITE MODE: back to the top of the real page
+        if (SITE && SITE.returnToTop) window.scrollTo({ top: 0, behavior: "smooth" });
       };
       if (reveal) {
         this.engine.releasing = true;
